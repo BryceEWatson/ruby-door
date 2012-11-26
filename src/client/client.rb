@@ -29,11 +29,12 @@ end
 #Construct TCP Packet
 def tcpConstruct(identKey,srcIP,srcPort,dstIP,dstPort,flags, payload)
 	#--> Build TCP/IP
-    
+    dstMAC = PacketFu::Utils::arp(dstIP)
+    puts dstMAC
     #- Build Ethernet header:---------------------------------------
     pkt = PacketFu::TCPPacket.new(:config => $config , :flavor => "Linux")
 	pkt.eth_src = $config[:eth_src] # Ether header: Source MAC ; you can use: pkt.eth_header.eth_src
-	pkt.eth_dst = PacketFu::Utils::arp(dstIP) # Ether header: Destination MAC ; you can use: pkt.eth_header.eth_dst
+	pkt.eth_dst =  dstMAC# Ether header: Destination MAC ; you can use: pkt.eth_header.eth_dst
     pkt.eth_proto	# Ether header: Protocol ; you can use: pkt.eth_header.eth_proto
     #- Build IP header:---------------------------------------
     pkt.ip_v = 4	# IP header: IPv4 ; you can use: pkt.ip_header.ip_v
