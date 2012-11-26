@@ -278,7 +278,7 @@ while true do
 		end
 		if num == "1" # Connect To Backdoor
 			# Establish Session with Backdoor
-			gotSession = establishSession($identKey,$srcIP,$srcPort,$dstIP,$dstPort,$config)
+			gotSession = establishSession($identKey,$srcIP,Random.rand(65535),$dstIP,$cmdPort,$config)
 			if gotSession
 				# Display Connected Page
 				while true do
