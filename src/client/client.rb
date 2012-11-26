@@ -14,9 +14,9 @@ def loadConfig(path)
 	#TODO: Load from file
 	$identKey = 12345 # Identifies us to server
 	$timeout = 5
-	iName = "lo" # Our interface name
-	$dstIP = "127.0.0.1"
-	$srcIP = "127.0.0.1"
+	iName = "eth0" # Our interface name
+	$dstIP = "192.168.0.108"
+	$srcIP = "192.168.0.107"
 	$cmdPort = "80" # TCP goes here
 	cmdField = "seq-number" # Options: seq-number,ack-number
 	$dataPort = "2289" # UDP goes here

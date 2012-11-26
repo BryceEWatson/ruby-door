@@ -140,6 +140,7 @@ begin
 	print "starting up\n"
 	capturedTCP = PacketFu::Capture.new(:iface => $config[:iface], :start => true, :promisc => true, :filter => "tcp")
 	print "about to capture\n"
+	Signal.trap("INT") { exit 0 }
 	capturedTCP.stream.each { |packet|
 		puts "Got one!"
 		pkt = Packet.parse packet
@@ -154,11 +155,8 @@ begin
 				tcpResp.to_w # Sent
 				# TODO: Use thread instead.
 				dataListener($identKey,dstIP,dstPort)
-				
 			end
 		end
 	}
-	rescue Interrupt => e
-	puts "Interrupted by user"
-	exit 0
+
 end
