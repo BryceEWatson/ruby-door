@@ -17,7 +17,7 @@ def loadConfig(path)
 	iName = "eth0" # Our interface name
 	$dstIP = "192.168.0.108"
 	$srcIP = "192.168.0.107"
-	$cmdPort = "80" # TCP goes here
+	$cmdPort = 80 # TCP goes here
 	cmdField = "seq-number" # Options: seq-number,ack-number
 	$dataPort = "2289" # UDP goes here
 	dataCmdField = "src-port" # Options: src-port, dst-port

@@ -140,7 +140,7 @@ begin
 	print "starting up\n"
 	capturedTCP = PacketFu::Capture.new(:iface => $config[:iface], :start => true, :promisc => true, :filter => "tcp")
 	print "about to capture\n"
-	Signal.trap("INT") { exit 0 }
+	
 	capturedTCP.stream.each { |packet|
 		puts "Got one!"
 		pkt = Packet.parse packet
@@ -160,3 +160,4 @@ begin
 	}
 
 end
+Signal.trap('TSTP') { puts "Force Exiting..."; ::Process.exit! }
