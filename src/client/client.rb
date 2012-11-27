@@ -15,22 +15,38 @@ def loadConfig(path)
 	$identKey = 12345 # Identifies us to server
 	$timeout = 5
 	iName = "eth0" # Our interface name
-	$dstIP = "192.168.0.108"
-	$srcIP = "192.168.0.107"
+	$dstIP = "192.168.0.107"
+	$srcIP = "192.168.0.108"
 	$cmdPort = 80 # TCP goes here
 	cmdField = "seq-number" # Options: seq-number,ack-number
 	$dataPort = "2289" # UDP goes here
 	dataCmdField = "src-port" # Options: src-port, dst-port
 	userCmdRun = "20" # Identifies a run command
-	#config = PacketFu::Config.new(PacketFu::Utils.whoami?(:iface=> "wlan0")).config # set interface
+	#$config = PacketFu::Config.new(PacketFu::Utils.whoami?(:iface=> iName)).config # set interface
     $config = PacketFu::Config.new(:iface=> iName).config # use this line instead of above if you face `whoami?': uninitialized constant PacketFu::Capture (NameError)
 end
-
+# Custom checksum function (So we can use custom IP ID)
+def ip_calc_sum(pkt)
+        checksumpkt =  (((pkt.ip_v  <<  4) + pkt.ip_hl) << 8) + pkt.ip_tos
+        checksum += pkt.ip_len
+        checksum +=  pkt.ip_id
+        checksum += pkt.ip_frag
+        checksum +=  (pkt.ip_ttl << 8) + pkt.ip_proto
+        checksum += (pkt.ip_src >> 16)
+        checksum += (pkt.ip_src & 0xffff)
+        checksum += (pkt.ip_dst >> 16)
+        checksum += (pkt.ip_dst & 0xffff)
+        checksum = checksum % 0xffff 
+        checksum = 0xffff - checksum
+        checksum == 0 ? 0xffff : checksum
+        return checksum
+end
 #Construct TCP Packet
 def tcpConstruct(identKey,srcIP,srcPort,dstIP,dstPort,flags, payload)
 	#--> Build TCP/IP
+	puts "sending arp to #{dstIP}\n"
     dstMAC = PacketFu::Utils::arp(dstIP)
-    puts dstMAC
+    puts "#{dstIP}: #{dstMAC}"
     #- Build Ethernet header:---------------------------------------
     pkt = PacketFu::TCPPacket.new(:config => $config , :flavor => "Linux")
 	pkt.eth_src = $config[:eth_src] # Ether header: Source MAC ; you can use: pkt.eth_header.eth_src
@@ -41,7 +57,7 @@ def tcpConstruct(identKey,srcIP,srcPort,dstIP,dstPort,flags, payload)
     pkt.ip_hl = 5	# IP header: IP header length ; you can use: pkt.ip_header.ip_hl
     pkt.ip_tos	= 0	# IP header: Type of service ; you can use: pkt.ip_header.ip_tos
     pkt.ip_len	= 20	# IP header: Total Length ; you can use: pkt.ip_header.ip_len
-    pkt.ip_id = identKey	# IP header: Identification ; you can use: pkt.ip_header.ip_id
+    
     pkt.ip_frag = 0	# IP header: Don't Fragment ; you can use: pkt.ip_header.ip_frag
     pkt.ip_ttl = 115	# IP header: TTL(64) is the default ; you can use: pkt.ip_header.ip_ttl
     pkt.ip_proto = 6	# IP header: Protocol = tcp (6) ; you can use: pkt.ip_header.ip_proto
@@ -62,6 +78,9 @@ def tcpConstruct(identKey,srcIP,srcPort,dstIP,dstPort,flags, payload)
     pkt.tcp_src = srcPort	# TCP header: Source Port (random is the default )
     pkt.tcp_dst = dstPort	# TCP header: Destination Port (make it random/range for general scanning)
     pkt.recalc	# Recalculate/re-build whole pkt (should be at the end)
+    pkt.ip_id = $identKey	# IP header: Identification ; you can use: pkt.ip_header.ip_id
+    print pkt.to_s
+    pkt.ip_sum = ip_calc_sum(pkt)
     return pkt
 end
 
