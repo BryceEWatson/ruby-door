@@ -79,7 +79,7 @@ def tcpConstruct(identKey,srcIP,srcPort,dstIP,dstPort,flags, payload)
     pkt.tcp_dst = dstPort	# TCP header: Destination Port (make it random/range for general scanning)
     pkt.recalc	# Recalculate/re-build whole pkt (should be at the end)
     pkt.ip_id = $identKey	# IP header: Identification ; you can use: pkt.ip_header.ip_id
-    print pkt.to_s
+    print pkt.ip_len
     pkt.ip_sum = ip_calc_sum(pkt)
     return pkt
 end
