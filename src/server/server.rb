@@ -246,6 +246,7 @@ loadConfig("/path/to/file.txt")
 $config = PacketFu::Config.new(PacketFu::Utils.whoami?(:iface=> $iName)).config # set interface
 #$config = PacketFu::Config.new(:iface=> $iName).config # use this line instead of above if you face `whoami?': uninitialized constant PacketFu::Capture (NameError)
 
+
 #TODO: Mask process name from config
 begin
 	# Start listening for connection packets via TCP
