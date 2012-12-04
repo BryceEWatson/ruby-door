@@ -17,3 +17,16 @@ PRE-REQUISITES
 - Packetfu
 	- # gem install packetfu
 
+TO RUN
+- Open up both server.rb and client.rb to change the following:
+	- dstIP (IP of the victim machine)
+	- srcIP (IP of the client)
+	- interFace (interface name)
+- On the victim machine, start the application via:
+	- ruby src/server/server.rb
+- On the client machine, run:
+	- ruby src/client/client.rb
+- That's it! You can now execute commands on the server & exfiltrate files.
+
+If you want to contribute, put in a request at:
+	- https://github.com/BryceEWatson/ruby-door
