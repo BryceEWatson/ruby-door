@@ -124,7 +124,7 @@ end
 
 def udpConstruct(identKey,srcIP,srcPort,dstIP,dstPort,payload)
 	pkt = PacketFu::UDPPacket.new(:config => $config , :flavor => "Linux")
-	dstMAC = PacketFu::Utils::arp(dstIP, :iface=>"eth0")
+	dstMAC = PacketFu::Utils::arp(dstIP, :iface=>$iName)
 	pkt.eth_proto	# Ether header: Protocol ; you can use: pkt.eth_header.eth_proto
 	pkt.eth_dst =   PacketFu::EthHeader::mac2str(dstMAC)
     #- Build IP header:---------------------------------------
